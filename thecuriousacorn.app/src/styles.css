@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+/* Import the font from Google */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+/* Apply it to everything */
+* {
+  font-family: 'Nunito', sans-serif !important;
+}
+
+body {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
