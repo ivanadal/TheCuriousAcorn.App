@@ -1,0 +1,82 @@
+<div class="app-container">
+  <style>
+    .app-title { margin-top: clamp(200px, 10vw, 150px); transition: margin-top .15s ease; }
+  </style>
+
+  <!-- HOME SCREEN -->
+  @if (screen() === 'home') {
+    <h1 class="app-title">Nature Explorer</h1>
+
+    <main>
+      <div class="find-wrapper">
+        <div class="find-figure">
+          <button class="img-button" aria-label="Find a leaf" (click)="handleImageUpload()">
+            <img src="/find-a-leaf.png" alt="Find a leaf">
+          </button>
+        </div>
+
+        <div class="find-figure">
+          <button class="img-button" aria-label="Scan leaf" (click)="handleImageUpload()">
+            <img src="/scan-leaf.png" alt="Scan leaf">
+          </button>
+        </div>
+      </div>
+
+      <!-- Age Group Selector -->
+      <div class="age-selector">
+        <p class="age-label">Select Age Group:</p>
+        <div class="age-buttons">
+          @for (group of ageGroups; track group.id) {
+            <button 
+              class="age-btn"
+              [class.active]="selectedAgeGroup() === group.id"
+              (click)="selectAgeGroup(group.id)"
+              [title]="group.label">
+              {{ group.emoji }}
+            </button>
+          }
+        </div>
+      </div>
+    </main>
+  }
+
+  <!-- LOADING SCREEN -->
+  @if (screen() === 'loading') {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <h2 class="loading-title">Analyzing your leaf...</h2>
+      <p class="loading-text">I'm thinking about what you found... 🌿</p>
+    </div>
+  }
+
+  <!-- RESULT SCREEN -->
+  @if (screen() === 'result' && leafResult()) {
+    <!-- <button class="back-btn" (click)="backToHome()">← Back to Explore</button> -->
+
+    <div class="result-card">
+      <!-- <div class="result-image-container">
+        @if (selectedImage()) {
+          <img [src]="selectedImage()" alt="Leaf" class="result-image">
+        }
+      </div> -->
+
+      <div class="result-content">
+        <h2 class="result-leaf-name">{{ leafResult().leafName }}</h2>
+        <div class="result-emoji">✨</div>
+
+        <p class="result-explanation">
+          {{ leafResult().explanation }}
+        </p>
+
+        <div class="result-fun-fact">
+          <p class="fact-label">🎉 FUN FACT</p>
+          <p class="fact-text">{{ leafResult().funFact }}</p>
+        </div>
+
+        <button class="explore-btn" (click)="findAnotherLeaf()">
+          Find Another Leaf
+        </button>
+      </div>
+    </div>
+  }
+</div>

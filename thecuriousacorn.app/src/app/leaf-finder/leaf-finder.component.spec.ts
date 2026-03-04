@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LeafFinder } from './leaf-finder';
+import { LeafFinderComponent } from './leaf-finder';
 
-describe('LeafFinder', () => {
-  let component: LeafFinder;
-  let fixture: ComponentFixture<LeafFinder>;
+describe('LeafFinderComponent', () => {
+  let component: LeafFinderComponent;
+  let fixture: ComponentFixture<LeafFinderComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LeafFinder],
+      imports: [LeafFinderComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(LeafFinder);
+    fixture = TestBed.createComponent(LeafFinderComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
