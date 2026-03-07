@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'leaf-finder',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './leaf-finder.component.html',
-  styleUrl: './leaf-finder.component.css'
+  templateUrl: './leaf-finder.html',
+  styleUrl: './leaf-finder.css'
 })
 export class LeafFinderComponent {
   screen = signal<'home' | 'loading' | 'result'>('home');

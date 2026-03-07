@@ -1,0 +1,55 @@
+<div class="login-container">
+  <div class="login-card">
+    <!-- Header -->
+    <div class="login-header">
+      <h1 class="app-title">🌰 The Curious Acorn</h1>
+      <p class="subtitle">Discover nature, one leaf at a time</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Logging you in...</p>
+      </div>
+    } @else {
+      <!-- Error Message -->
+      @if (error()) {
+        <div class="error-message">
+          ❌ {{ error() }}
+          <button class="close-error" (click)="error.set(null)">×</button>
+        </div>
+      }
+
+      <!-- Google Sign-In Button Container -->
+      <div class="sign-in-container">
+        <p class="sign-in-label">Sign in with your account</p>
+        <div id="googleSignInButton"></div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Demo Login (for testing) -->
+      <button class="demo-btn" (click)="loginAsDemo()" [disabled]="isLoading()">
+        🧪 Try as Demo User
+      </button>
+
+      <!-- Terms -->
+      <p class="terms">
+        By signing in, you agree to our
+        <a href="#terms">Terms of Service</a> and
+        <a href="#privacy">Privacy Policy</a>
+      </p>
+    }
+  </div>
+
+  <!-- Background Decoration -->
+  <div class="background-decoration">
+    <div class="leaf leaf-1">🍃</div>
+    <div class="leaf leaf-2">🌿</div>
+    <div class="leaf leaf-3">🍂</div>
+  </div>
+</div>

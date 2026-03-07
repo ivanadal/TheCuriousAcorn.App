@@ -1,6 +1,6 @@
 <div class="app-container">
   <style>
-    .app-title { margin-top: clamp(200px, 10vw, 150px); transition: margin-top .15s ease; }
+    .app-title { margin-top: clamp(250px, 5vw, 150px); transition: margin-top .15s ease; }
   </style>
 
   <!-- HOME SCREEN -->
@@ -27,7 +27,7 @@
         <p class="age-label">Select Age Group:</p>
         <div class="age-buttons">
           @for (group of ageGroups; track group.id) {
-            <button 
+            <button
               class="age-btn"
               [class.active]="selectedAgeGroup() === group.id"
               (click)="selectAgeGroup(group.id)"

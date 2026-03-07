@@ -188,7 +188,7 @@
   width: 100%;
   padding: 0 12px;
   box-sizing: border-box;
-  margin: 165px auto 40px auto; 
+  margin: 35vh auto 40px auto; 
 }
 
 .result-image-container {
@@ -274,7 +274,7 @@
 @media (max-width: 480px) {
   .result-card {
     max-width: 100%;
-    margin: 165px 0;
+    margin: 35vh 0;
   }
 
   .result-image-container {
