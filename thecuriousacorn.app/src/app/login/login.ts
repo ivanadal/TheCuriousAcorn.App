@@ -74,8 +74,11 @@ export class LoginComponent implements OnInit, OnDestroy {
    */
   private renderGoogleButton() {
     try {
-         // Get Client ID from ConfigService (loaded from backend)
+      console.log('Attempting to render Google button...');
+
+      // Get Client ID from ConfigService (loaded from backend)
       const googleClientId = this.configService.getGoogleClientId();
+      console.log('Google Client ID:', googleClientId ? 'Set' : 'Not set');
 
       if (!googleClientId) {
         console.error('Google Client ID not configured');
@@ -93,6 +96,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       });
 
       const buttonContainer = document.getElementById('googleSignInButton');
+      console.log('Button container found:', !!buttonContainer);
+
       if (buttonContainer) {
         window.google.accounts.id.renderButton(
           buttonContainer,
@@ -103,6 +108,10 @@ export class LoginComponent implements OnInit, OnDestroy {
             text: 'signin_with'
           }
         );
+        console.log('Google button rendered');
+      } else {
+        console.error('Google button container not found');
+        this.error.set('Sign-in button container not found.');
       }
     } catch (error) {
       console.error('Error initializing Google Sign-In:', error);
@@ -122,6 +131,17 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.authService.initGoogleAuth(response.credential);
     } else {
       this.error.set('Failed to get Google credentials. Please try again.');
+    }
+  }
+
+  /**
+   * Trigger Google Sign-In prompt
+   */
+  signInWithGoogle() {
+    if (window.google && window.google.accounts && window.google.accounts.id) {
+      window.google.accounts.id.prompt();
+    } else {
+      this.error.set('Google Sign-In not ready. Please refresh the page.');
     }
   }
 

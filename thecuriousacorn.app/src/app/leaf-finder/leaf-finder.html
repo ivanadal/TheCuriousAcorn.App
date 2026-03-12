@@ -62,21 +62,27 @@
       </div> -->
 
       <div class="result-content">
-        <h2 class="result-leaf-name">{{ leafResult().leafName }}</h2>
+        <button class="replay-btn repeat-btn" *ngIf="lastAudioUrl" (click)="replayAudio()" title="Replay voice">
+          <img src="/repeat-btn.png" alt="Replay" class="repeat-icon">
+        </button>
+        <h2 class="result-leaf-name">{{ leafResult()?.leafName }}</h2>
         <div class="result-emoji">✨</div>
 
         <p class="result-explanation">
-          {{ leafResult().explanation }}
+          {{ leafResult()?.explanation }}
         </p>
 
         <div class="result-fun-fact">
           <p class="fact-label">🎉 FUN FACT</p>
-          <p class="fact-text">{{ leafResult().funFact }}</p>
+          <p class="fact-text">{{ leafResult()?.funFact }}</p>
         </div>
 
         <button class="explore-btn" (click)="findAnotherLeaf()">
           Find Another Leaf
         </button>
+        <!-- <button class="replay-btn" *ngIf="lastAudioUrl" (click)="replayAudio()">
+          🔁                         
+        </button> -->
       </div>
     </div>
   }

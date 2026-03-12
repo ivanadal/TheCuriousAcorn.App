@@ -7,6 +7,7 @@ import { environment } from '../../environments/environment';
 
 export interface AppConfig {
   googleClientId: string;
+  eventLabsApiKey : string;
   apiUrl: string;
   production: boolean;
 }
@@ -41,16 +42,7 @@ export class ConfigService {
       return config;
     } catch (error) {
       console.error('Failed to load config:', error);
-      
-      // Fallback to environment config
-      const fallback: AppConfig = {
-        googleClientId: environment.google.clientId,
-        apiUrl: environment.apiUrl,
-        production: environment.production
-      };
-      this.config.set(fallback);
-      this.isLoaded.set(true);
-      return fallback;
+      throw error;
     }
   }
 
@@ -73,5 +65,9 @@ export class ConfigService {
    */
   getApiUrl(): string {
     return this.config()?.apiUrl || environment.apiUrl;
+  }
+
+   getEventLabsApiKey(): string {
+    return this.config()?.eventLabsApiKey || environment.apiUrl;
   }
 }
