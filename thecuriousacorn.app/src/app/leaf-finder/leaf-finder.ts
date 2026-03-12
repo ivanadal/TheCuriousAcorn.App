@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LeafService } from '../services/leaf-finder.service';
 
 @Component({
   selector: 'leaf-finder',
@@ -13,6 +14,9 @@ export class LeafFinderComponent {
   selectedAgeGroup = signal('early');
   leafResult = signal<any>(null);
   selectedImage = signal<string | null>(null);
+  isLoading = false;
+  result: any = null;
+  base64Image: string = '';
 
   ageGroups = [
     { id: 'preschool', label: '4-6 years', emoji: '🌱' },
@@ -20,6 +24,8 @@ export class LeafFinderComponent {
     { id: 'middle', label: '10-12 years', emoji: '🌳' },
     { id: 'teen', label: '13+ years', emoji: '🌲' }
   ];
+
+  constructor(private leafService: LeafService) {}
 
   mockResponses = {
     preschool: {
@@ -46,14 +52,59 @@ export class LeafFinderComponent {
 
   handleImageUpload() {
     this.screen.set('loading');
+
+    this.analyzeLeaf(this.base64Image);
     
-    // Simulate file upload
-    setTimeout(() => {
-      const response = this.mockResponses[this.selectedAgeGroup() as keyof typeof this.mockResponses];
-      this.leafResult.set(response);
-      this.selectedImage.set('https://images.unsplash.com/photo-1511656828935-0cb5233d976d?w=400&h=300&fit=crop');
-      this.screen.set('result');
-    }, 2000);
+    // // Simulate file upload
+    // setTimeout(() => {
+    //   const response = this.mockResponses[this.selectedAgeGroup() as keyof typeof this.mockResponses];
+    //   this.leafResult.set(response);
+    //   this.selectedImage.set('https://images.unsplash.com/photo-1511656828935-0cb5233d976d?w=400&h=300&fit=crop');
+    //   this.screen.set('result');
+    // }, 2000);
+  }
+
+openCamera(): void {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment'; // rear camera
+  
+  input.onchange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+      const file = target.files[0];
+      console.log('Selected file:', file);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.base64Image = e.target?.result as string;
+        console.log('Base64:', this.base64Image);
+
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  input.click(); // triggers camera/file picker
+}
+
+ private analyzeLeaf(base64Image: string): void {
+    this.isLoading = true;
+
+    this.leafService.analyzeLeaf(base64Image).subscribe({
+      next: (response) => {
+        this.result = response;
+        this.isLoading = false;
+        this.leafResult.set(response);
+        this.screen.set('result');
+        console.log('Analysis result:', response);
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        this.isLoading = false;
+      }
+    });
   }
 
   backToHome() {

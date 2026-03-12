@@ -2,6 +2,7 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class AuthService {
   isLoading = signal(false);
   error = signal<string | null>(null);
 
-  private apiUrl = 'http://localhost:5000/api/auth';
+  //private apiUrl = 'http://localhost:5002/api/auth';
+  private apiUrl = environment.apiUrl+ "/auth"; 
 
   constructor() {
     this.checkAuthStatus();
