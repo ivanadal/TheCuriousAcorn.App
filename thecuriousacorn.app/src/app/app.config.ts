@@ -2,7 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { HTTP_INTERCEPTORS, provideHttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
 import { appInitializerProvider } from './services/app.initializer';
 
@@ -13,7 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
 
     // HTTP client with interceptors
-    provideHttpClient(),
+    provideHttpClient(withInterceptorsFromDi()),
 
     // Load config from backend before app starts
     appInitializerProvider,

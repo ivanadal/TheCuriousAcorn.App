@@ -62,7 +62,10 @@
               "buildTarget": "thecuriousacorn.app:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options":{
+            "allowedHosts": ["inevasible-agnes-postrhinal.ngrok-free.dev"]
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"
