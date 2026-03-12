@@ -270,6 +270,33 @@
   transform: translateY(0);
 }
 
+/* replay button styling */
+.result-content {
+  position: relative;
+}
+.replay-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  padding: 4px;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-right: -1.5rem!important;
+}
+
+.replay-btn:hover {
+  background: rgba(255,255,255,1);
+}
+
+.repeat-icon {
+  width: 6rem;
+  height: 4rem;
+}
+
 /* Mobile optimizations */
 @media (max-width: 480px) {
   .result-card {

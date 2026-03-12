@@ -1,6 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafService } from '../services/leaf-finder.service';
+import { environment } from '../../environments/environment';
+
+export interface LeafAnalysisResult {
+  leafName: string;
+  explanation: string;
+  funFact: string;
+  voiceUrl?: string; // optional URL to pre-generated audio
+}
 
 @Component({
   selector: 'leaf-finder',
@@ -9,14 +17,17 @@ import { LeafService } from '../services/leaf-finder.service';
   templateUrl: './leaf-finder.html',
   styleUrl: './leaf-finder.css'
 })
+
 export class LeafFinderComponent {
   screen = signal<'home' | 'loading' | 'result'>('home');
   selectedAgeGroup = signal('early');
-  leafResult = signal<any>(null);
+  leafResult = signal<LeafAnalysisResult | null>(null);
   selectedImage = signal<string | null>(null);
   isLoading = false;
-  result: any = null;
+  result: LeafAnalysisResult | null = null;
   base64Image: string = '';
+  lastAudioUrl: string | null = null;
+  private audioElement: HTMLAudioElement | null = null;
 
   ageGroups = [
     { id: 'preschool', label: '4-6 years', emoji: '🌱' },
@@ -26,29 +37,6 @@ export class LeafFinderComponent {
   ];
 
   constructor(private leafService: LeafService) {}
-
-  mockResponses = {
-    preschool: {
-      leafName: 'Oak Leaf',
-      explanation: "Wow! This is a big leaf! Leaves help plants drink the sun! It's green because it loves the sunshine!",
-      funFact: 'Did you know? Leaves are like little solar panels! ☀️'
-    },
-    early: {
-      leafName: 'Oak Leaf',
-      explanation: "This is a beautiful oak leaf! Oak trees can live for a very long time. The leaf is green because it has something called chlorophyll that helps the tree make food from sunlight. That's pretty cool!",
-      funFact: 'Oak trees are home to hundreds of different insects and animals! 🦗🐿️'
-    },
-    middle: {
-      leafName: 'White Oak (Quercus alba)',
-      explanation: "This is an oak leaf from a white oak tree. Notice the rounded lobes - this leaf shape is specially designed to reduce water loss in dry conditions. Oak leaves turn red or brown in fall because the tree stops making chlorophyll to save energy for winter. These trees are super important for wildlife - squirrels, birds, and insects depend on them for food and shelter.",
-      funFact: 'White oak trees can live for over 300 years! Some are older than the United States! 🌳'
-    },
-    teen: {
-      leafName: 'White Oak (Quercus alba)',
-      explanation: "This appears to be a white oak, identifiable by its characteristic rounded lobes with sinuses that don't reach the midrib. The pinnate venation pattern maximizes photosynthetic surface area while the lobed morphology reduces wind resistance. The waxy cuticle on the leaf surface serves as a protective barrier against water loss and pathogenic infection.",
-      funFact: 'Oak species support over 500 specialized insect species, which form the foundation of temperate forest food webs. 🔗🌍'
-    }
-  };
 
   handleImageUpload() {
     this.screen.set('loading');
@@ -92,14 +80,23 @@ openCamera(): void {
  private analyzeLeaf(base64Image: string): void {
     this.isLoading = true;
 
-    this.leafService.analyzeLeaf(base64Image).subscribe({
-      next: (response) => {
+    this.leafService.analyzeLeaf(base64Image, this.selectedAgeGroup()).subscribe({
+      next: (response: LeafAnalysisResult) => {
         this.result = response;
         this.isLoading = false;
         this.leafResult.set(response);
         this.screen.set('result');
         console.log('Analysis result:', response);
+
+        if (response.voiceUrl) {
+          // prepend the backend base URL so relative paths work
+          const url = `${environment.apiBaseUrl}${response.voiceUrl}`;
+          this.lastAudioUrl = url;
+          this.audioElement = new Audio(url);
+          this.audioElement.play().catch(err => console.error('Audio play error:', err, url));
+        } 
       },
+
       error: (err) => {
         console.error('Error:', err);
         this.isLoading = false;
@@ -121,5 +118,18 @@ openCamera(): void {
 
   selectAgeGroup(ageId: string) {
     this.selectedAgeGroup.set(ageId);
+  }
+
+  replayAudio() {
+    if (this.lastAudioUrl) {
+      if (this.audioElement) {
+        this.audioElement.currentTime = 0;
+        this.audioElement.play().catch(err => console.error('Replay error', err));
+      } else {
+        const audio = new Audio(this.lastAudioUrl);
+        audio.play().catch(err => console.error('Replay error', err));
+        this.audioElement = audio;
+      }
+    }
   }
 }
