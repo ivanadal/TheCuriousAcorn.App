@@ -17,17 +17,19 @@
   padding: 12px;
   box-sizing: border-box;
   border: 10px solid #0b6623;
+  overflow-y: auto;
 }
 
 /* Title */
 .app-title {
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
-  font-size: 2rem;
+  font-size: clamp(1.3rem, 5vw, 2rem);
   color: #4A5D45;
   text-transform: uppercase;
   text-align: center;
-  margin-top: clamp(200px, 10vw, 150px);
+  margin-top: clamp(130px, 30vh, 240px);
+  margin-bottom: 0;
   transition: margin-top 0.15s ease;
   margin-left: auto;
   margin-right: auto;
@@ -38,10 +40,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
-  margin-top: 40px;
+  gap: clamp(12px, 3vw, 24px);
+  margin-top: clamp(12px, 4vw, 40px);
   margin-left: auto;
   margin-right: auto;
+  width: 100%;
 }
 
 .find-figure {
@@ -62,31 +65,85 @@
 }
 
 .img-button img {
-  width: clamp(160px, 90%, 280px);
+  width: clamp(160px, 75vw, 420px);
   height: auto;
   object-fit: contain;
 }
 
-.img-button:hover img {
-  transform: scale(1.05);
+.img-button:active {
+  box-shadow: none;
 }
 
-.img-button:focus {
-  outline: 3px solid rgba(11, 102, 35, 0.18);
-  outline-offset: 4px;
-  border-radius: 6px;
+/* Wrapper that holds the border frame + retake button */
+.retake-wrapper {
+  position: relative;
+  display: inline-block;
+  width: clamp(160px, 75vw, 420px);
+  padding: 20px 20px 0 0;
+  box-sizing: border-box;
+}
+
+/* Border frame fills the wrapper */
+.find-a-leaf-border-container {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border: 4px solid #4A5D45;
+  border-radius: 18px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: none;
+}
+
+/* Selected image fills the frame */
+.find-a-leaf-border-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+}
+
+/* Retake button anchored to top-right of wrapper */
+.retake-btn-pos {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  box-shadow: none;
+  outline: none;
+  line-height: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.retake-btn-pos:hover,
+.retake-btn-pos:focus,
+.retake-btn-pos:active {
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.retake-btn-pos img {
+  width: clamp(6rem, 14vw, 7rem);
+  height: auto;
+  display: block;
 }
 
 /* Age Group Selector */
 .age-selector {
-  margin-top: 60px;
+  margin-top: clamp(12px, 4vw, 40px);
   margin-left: auto;
   margin-right: auto;
   text-align: center;
-  /* background: rgba(255, 255, 255, 0.9); */
-  padding: 20px;
+  padding: clamp(8px, 2vw, 20px);
   border-radius: 12px;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
 }
 
 .age-label {
@@ -278,23 +335,28 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(255,255,255,0.8);
+  background: none;
   border: none;
   padding: 4px;
   border-radius: 50%;
   font-size: 1.4rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: none;
   margin-right: -1.5rem!important;
+  box-shadow: none;
 }
 
-.replay-btn:hover {
-  background: rgba(255,255,255,1);
+.replay-btn:hover,
+.replay-btn:focus,
+.replay-btn:active {
+  background: none;
+  box-shadow: none;
+  outline: none;
 }
 
 .repeat-icon {
-  width: 6rem;
-  height: 4rem;
+  width: clamp(3rem, 12vw, 6rem);
+  height: auto;
 }
 
 /* Mobile optimizations */
