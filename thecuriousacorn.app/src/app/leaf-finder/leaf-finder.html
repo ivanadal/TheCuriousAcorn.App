@@ -1,6 +1,6 @@
 <div class="app-container">
   <style>
-    .app-title { margin-top: clamp(250px, 5vw, 150px); transition: margin-top .15s ease; }
+    .app-title { margin-top: clamp(130px, 30vh, 240px); transition: margin-top .15s ease; }
   </style>
 
   <!-- HOME SCREEN -->
@@ -12,7 +12,19 @@
         <div class="find-figure">
           <button class="img-button" aria-label="Find a leaf" (click)="openCamera
           ()">
-            <img src="/find-a-leaf.png" alt="Find a leaf">
+            <ng-container *ngIf="selectedImage(); else noImage">
+              <div class="retake-wrapper">
+                <span class="find-a-leaf-border-container">
+                  <img [src]="selectedImage()" alt="Find a leaf">
+                </span>
+                <button class="retake-btn-pos" (click)="openCamera(); $event.stopPropagation()" title="Retake photo">
+                  <img src="/repeat-btn.png" alt="Retake" class="repeat-icon">
+                </button>
+              </div>
+            </ng-container>
+            <ng-template #noImage>
+              <img src="/find-a-leaf.png" alt="Find a leaf">
+            </ng-template>
           </button>
         </div>
 
@@ -23,21 +35,11 @@
         </div>
       </div>
 
+      @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+      }
+
       <!-- Age Group Selector -->
-      <div class="age-selector">
-        <p class="age-label">Select Age Group:</p>
-        <div class="age-buttons">
-          @for (group of ageGroups; track group.id) {
-            <button
-              class="age-btn"
-              [class.active]="selectedAgeGroup() === group.id"
-              (click)="selectAgeGroup(group.id)"
-              [title]="group.label">
-              {{ group.emoji }}
-            </button>
-          }
-        </div>
-      </div>
     </main>
   }
 

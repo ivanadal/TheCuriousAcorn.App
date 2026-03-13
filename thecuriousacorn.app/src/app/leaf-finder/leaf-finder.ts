@@ -23,6 +23,7 @@ export class LeafFinderComponent {
   selectedAgeGroup = signal('early');
   leafResult = signal<LeafAnalysisResult | null>(null);
   selectedImage = signal<string | null>(null);
+  errorMessage = signal<string | null>(null);
   isLoading = false;
   result: LeafAnalysisResult | null = null;
   base64Image: string = '';
@@ -38,46 +39,7 @@ export class LeafFinderComponent {
 
   constructor(private leafService: LeafService) {}
 
-  handleImageUpload() {
-    this.screen.set('loading');
-
-    this.analyzeLeaf(this.base64Image);
-    
-    // // Simulate file upload
-    // setTimeout(() => {
-    //   const response = this.mockResponses[this.selectedAgeGroup() as keyof typeof this.mockResponses];
-    //   this.leafResult.set(response);
-    //   this.selectedImage.set('https://images.unsplash.com/photo-1511656828935-0cb5233d976d?w=400&h=300&fit=crop');
-    //   this.screen.set('result');
-    // }, 2000);
-  }
-
-openCamera(): void {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.capture = 'environment'; // rear camera
-  
-  input.onchange = (event: Event) => {
-    const target = event.target as HTMLInputElement;
-    if (target.files && target.files[0]) {
-      const file = target.files[0];
-      console.log('Selected file:', file);
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.base64Image = e.target?.result as string;
-        console.log('Base64:', this.base64Image);
-
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  input.click(); // triggers camera/file picker
-}
-
- private analyzeLeaf(base64Image: string): void {
+  private analyzeLeaf(base64Image: string): void {
     this.isLoading = true;
 
     this.leafService.analyzeLeaf(base64Image, this.selectedAgeGroup()).subscribe({
@@ -104,6 +66,52 @@ openCamera(): void {
     });
   }
 
+  handleImageUpload() {
+    if (!this.selectedImage()) {
+      this.errorMessage.set("Please select an image first using the camera button.");
+      return;
+    }
+    this.errorMessage.set(null);
+    this.screen.set('loading');
+
+    this.analyzeLeaf(this.base64Image);
+    
+    // // Simulate file upload
+    // setTimeout(() => {
+    //   const response = this.mockResponses[this.selectedAgeGroup() as keyof typeof this.mockResponses];
+    //   this.leafResult.set(response);
+    //   this.selectedImage.set('https://images.unsplash.com/photo-1511656828935-0cb5233d976d?w=400&h=300&fit=crop');
+    //   this.screen.set('result');
+    // }, 2000);
+  }
+
+  openCamera(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment'; // rear camera
+    
+    input.onchange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        const file = target.files[0];
+        console.log('Selected file:', file);
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.base64Image = e.target?.result as string;
+          this.selectedImage.set(this.base64Image);
+          this.errorMessage.set(null);
+          console.log('Base64:', this.base64Image);
+
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    input.click(); // triggers camera/file picker
+  }
+
   backToHome() {
     this.screen.set('home');
     this.leafResult.set(null);
@@ -111,6 +119,10 @@ openCamera(): void {
   }
 
   findAnotherLeaf() {
+    if (this.audioElement) {
+      this.audioElement.pause();
+      this.audioElement.currentTime = 0;
+    }
     this.screen.set('home');
     this.leafResult.set(null);
     this.selectedImage.set(null);
