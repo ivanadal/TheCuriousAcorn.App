@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ConfigService } from '../services/config.service';
 
@@ -21,16 +21,21 @@ declare global {
 export class LoginComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private configService = inject(ConfigService);
+  private returnUrl = '/dashboard';
 
   isLoading = this.authService.isLoading;
   error = this.authService.error;
   showDemoLogin = signal(false);
 
   ngOnInit() {
+    const requestedReturnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard';
+    this.returnUrl = requestedReturnUrl.startsWith('/') ? requestedReturnUrl : '/dashboard';
+
     // Redirect if already logged in
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigateByUrl(this.returnUrl);
       return;
     }
 
@@ -128,7 +133,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     if (response && response.credential) {
       // Send the credential token to backend
-      this.authService.initGoogleAuth(response.credential);
+      this.authService.initGoogleAuth(response.credential, this.returnUrl);
     } else {
       this.error.set('Failed to get Google credentials. Please try again.');
     }
@@ -157,7 +162,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     
     setTimeout(() => {
       // Send demo token to backend for validation
-      this.authService.initGoogleAuth(demoToken);
+      this.authService.initGoogleAuth(demoToken, this.returnUrl);
     }, 1000);
   }
 }

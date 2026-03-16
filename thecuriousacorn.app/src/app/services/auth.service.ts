@@ -1,8 +1,13 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ApiErrorService } from './api-error.service';
+
+interface AuthResponse {
+  token: string;
+  user: unknown;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +15,7 @@ import { environment } from '../../environments/environment';
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private apiErrorService = inject(ApiErrorService);
 
   // Signals
   isLoggedIn = signal(false);
@@ -27,20 +33,31 @@ export class AuthService {
   /**
    * Initialize Google OAuth
    */
-  initGoogleAuth(googleAuthToken: string) {
+  initGoogleAuth(googleAuthToken: string, returnUrl: string = '/dashboard') {
     this.isLoading.set(true);
     this.error.set(null);
 
     this.http.post(`${this.apiUrl}/google-login`, {
       token: googleAuthToken
     }).subscribe({
-      next: (response: any) => {
+      next: (response: unknown) => {
+        if (!this.isAuthResponse(response)) {
+          this.error.set('Unexpected login response. Please try again.');
+          this.isLoading.set(false);
+          console.error('Invalid auth response payload', response);
+          return;
+        }
+
         this.setAuthData(response);
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.router.navigateByUrl(this.normalizeReturnUrl(returnUrl));
       },
       error: (error) => {
-        this.error.set('Login failed. Please try again.');
+        this.error.set(
+          this.apiErrorService.toUserMessage(error, {
+            default: 'Login failed. Please try again.'
+          })
+        );
         this.isLoading.set(false);
         console.error('Login error:', error);
       }
@@ -51,11 +68,15 @@ export class AuthService {
    * Logout user
    */
   logout() {
+    this.clearAuthState();
+    this.router.navigate(['/login']);
+  }
+
+  clearAuthState() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     this.isLoggedIn.set(false);
     this.currentUser.set(null);
-    this.router.navigate(['/login']);
   }
 
   /**
@@ -66,8 +87,16 @@ export class AuthService {
     const user = localStorage.getItem('user');
 
     if (token && user) {
-      this.isLoggedIn.set(true);
-      this.currentUser.set(JSON.parse(user));
+      try {
+        this.currentUser.set(JSON.parse(user));
+        this.isLoggedIn.set(true);
+      } catch (error) {
+        console.warn('Invalid persisted user payload. Clearing auth state.', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        this.isLoggedIn.set(false);
+        this.currentUser.set(null);
+      }
     }
   }
 
@@ -79,6 +108,22 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(response.user));
     this.isLoggedIn.set(true);
     this.currentUser.set(response.user);
+  }
+
+  private isAuthResponse(response: unknown): response is AuthResponse {
+    if (!response || typeof response !== 'object') {
+      return false;
+    }
+
+    const candidate = response as Partial<AuthResponse>;
+    return typeof candidate.token === 'string' && candidate.token.length > 0 && candidate.user != null;
+  }
+
+  private normalizeReturnUrl(returnUrl: string): string {
+    if (!returnUrl || !returnUrl.startsWith('/')) {
+      return '/dashboard';
+    }
+    return returnUrl;
   }
 
   /**

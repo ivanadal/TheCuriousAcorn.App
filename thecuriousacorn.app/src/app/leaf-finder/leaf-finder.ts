@@ -2,12 +2,26 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafService } from '../services/leaf-finder.service';
 import { environment } from '../../environments/environment';
+import { ApiErrorService } from '../services/api-error.service';
 
 export interface LeafAnalysisResult {
   leafName: string;
   explanation: string;
   funFact: string;
   voiceUrl?: string; // optional URL to pre-generated audio
+}
+
+function isLeafAnalysisResult(value: unknown): value is LeafAnalysisResult {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<LeafAnalysisResult>;
+  return (
+    typeof candidate.leafName === 'string' &&
+    typeof candidate.explanation === 'string' &&
+    typeof candidate.funFact === 'string'
+  );
 }
 
 @Component({
@@ -37,13 +51,24 @@ export class LeafFinderComponent {
     { id: 'teen', label: '13+ years', emoji: '🌲' }
   ];
 
-  constructor(private leafService: LeafService) {}
+  constructor(
+    private leafService: LeafService,
+    private apiErrorService: ApiErrorService
+  ) {}
 
   private analyzeLeaf(base64Image: string): void {
     this.isLoading = true;
 
     this.leafService.analyzeLeaf(base64Image, this.selectedAgeGroup()).subscribe({
       next: (response: LeafAnalysisResult) => {
+        if (!isLeafAnalysisResult(response)) {
+          this.isLoading = false;
+          this.screen.set('home');
+          this.errorMessage.set('We received an unexpected result. Please try again.');
+          console.error('Invalid leaf analysis response payload', response);
+          return;
+        }
+
         this.result = response;
         this.isLoading = false;
         this.leafResult.set(response);
@@ -60,8 +85,14 @@ export class LeafFinderComponent {
       },
 
       error: (err) => {
-        console.error('Error:', err);
+        console.error('Leaf analysis request failed', err);
         this.isLoading = false;
+        this.screen.set('home');
+        this.errorMessage.set(
+          this.apiErrorService.toUserMessage(err, {
+            default: 'We could not analyze this leaf right now. Please try again.'
+          })
+        );
       }
     });
   }
@@ -76,13 +107,6 @@ export class LeafFinderComponent {
 
     this.analyzeLeaf(this.base64Image);
     
-    // // Simulate file upload
-    // setTimeout(() => {
-    //   const response = this.mockResponses[this.selectedAgeGroup() as keyof typeof this.mockResponses];
-    //   this.leafResult.set(response);
-    //   this.selectedImage.set('https://images.unsplash.com/photo-1511656828935-0cb5233d976d?w=400&h=300&fit=crop');
-    //   this.screen.set('result');
-    // }, 2000);
   }
 
   openCamera(): void {

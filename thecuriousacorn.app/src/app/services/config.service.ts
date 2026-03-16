@@ -2,8 +2,9 @@
 // src/app/services/config.service.ts
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, retry, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ApiErrorService } from './api-error.service';
 
 export interface AppConfig {
   googleClientId: string;
@@ -17,6 +18,7 @@ export interface AppConfig {
 })
 export class ConfigService {
   private http = inject(HttpClient);
+  private apiErrorService = inject(ApiErrorService);
 
   config = signal<AppConfig | null>(null);
   isLoaded = signal(false);
@@ -32,7 +34,10 @@ export class ConfigService {
       console.log(`Loading config from: ${apiUrl}/auth/config`);
 
       const config = await firstValueFrom(
-        this.http.get<AppConfig>(`${apiUrl}/auth/config`)
+        this.http.get<AppConfig>(`${apiUrl}/auth/config`).pipe(
+          timeout(6000),
+          retry({ count: 2, delay: 700 })
+        )
       );
 
       this.config.set(config);
@@ -41,8 +46,25 @@ export class ConfigService {
       console.log('Config loaded successfully', config);
       return config;
     } catch (error) {
-      console.error('Failed to load config:', error);
-      throw error;
+      const userMessage = this.apiErrorService.toUserMessage(error, {
+        default: 'Unable to load remote config. Using safe defaults.'
+      });
+      console.error('Failed to load config after retries:', {
+        endpoint: `${environment.apiUrl}/auth/config`,
+        userMessage,
+        error
+      });
+      const fallbackConfig: AppConfig = {
+        googleClientId: '',
+        eventLabsApiKey: '',
+        apiUrl: environment.apiUrl,
+        production: environment.production
+      };
+
+      // Keep app booting in local/offline scenarios while using safe defaults.
+      this.config.set(fallbackConfig);
+      this.isLoaded.set(true);
+      return fallbackConfig;
     }
   }
 
@@ -67,7 +89,4 @@ export class ConfigService {
     return this.config()?.apiUrl || environment.apiUrl;
   }
 
-   getEventLabsApiKey(): string {
-    return this.config()?.eventLabsApiKey || environment.apiUrl;
-  }
 }
