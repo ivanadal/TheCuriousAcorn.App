@@ -24,6 +24,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private configService = inject(ConfigService);
   private returnUrl = '/dashboard';
+  backgroundImageUrl = 'login-screen.png';
 
   isLoading = this.authService.isLoading;
   error = this.authService.error;

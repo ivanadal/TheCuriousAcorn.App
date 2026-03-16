@@ -41,14 +41,15 @@ export class AuthService {
       token: googleAuthToken
     }).subscribe({
       next: (response: unknown) => {
-        if (!this.isAuthResponse(response)) {
+        const normalized = this.normalizeAuthResponse(response);
+        if (!normalized) {
           this.error.set('Unexpected login response. Please try again.');
           this.isLoading.set(false);
           console.error('Invalid auth response payload', response);
           return;
         }
 
-        this.setAuthData(response);
+        this.setAuthData(normalized);
         this.isLoading.set(false);
         this.router.navigateByUrl(this.normalizeReturnUrl(returnUrl));
       },
@@ -103,7 +104,7 @@ export class AuthService {
   /**
    * Set auth data after successful login
    */
-  private setAuthData(response: any) {
+  private setAuthData(response: AuthResponse) {
     localStorage.setItem('authToken', response.token);
     localStorage.setItem('user', JSON.stringify(response.user));
     this.isLoggedIn.set(true);
@@ -117,6 +118,65 @@ export class AuthService {
 
     const candidate = response as Partial<AuthResponse>;
     return typeof candidate.token === 'string' && candidate.token.length > 0 && candidate.user != null;
+  }
+
+  private normalizeAuthResponse(response: unknown): AuthResponse | null {
+    if (!response || typeof response !== 'object') {
+      return null;
+    }
+
+    const root = response as Record<string, unknown>;
+    const nested = root['data'] && typeof root['data'] === 'object' ? (root['data'] as Record<string, unknown>) : null;
+    const rootTokens = root['tokens'] && typeof root['tokens'] === 'object' ? (root['tokens'] as Record<string, unknown>) : null;
+    const nestedTokens = nested?.['tokens'] && typeof nested['tokens'] === 'object' ? (nested['tokens'] as Record<string, unknown>) : null;
+
+    const token = this.getFirstString(
+      root['token'],
+      root['accessToken'],
+      root['authToken'],
+      root['idToken'],
+      root['refreshToken'],
+      rootTokens?.['token'],
+      rootTokens?.['accessToken'],
+      rootTokens?.['authToken'],
+      rootTokens?.['idToken'],
+      rootTokens?.['refreshToken'],
+      root['jwt'],
+      nested?.['token'],
+      nested?.['accessToken'],
+      nested?.['authToken'],
+      nested?.['idToken'],
+      nested?.['refreshToken'],
+      nestedTokens?.['token'],
+      nestedTokens?.['accessToken'],
+      nestedTokens?.['authToken'],
+      nestedTokens?.['idToken'],
+      nestedTokens?.['refreshToken'],
+      nested?.['jwt']
+    );
+
+    const user =
+      root['user'] ??
+      root['profile'] ??
+      root['me'] ??
+      nested?.['user'] ??
+      nested?.['profile'] ??
+      nested?.['me'];
+
+    if (typeof token !== 'string' || token.length === 0 || user == null) {
+      return null;
+    }
+
+    return { token, user };
+  }
+
+  private getFirstString(...values: unknown[]): string | null {
+    for (const value of values) {
+      if (typeof value === 'string' && value.length > 0) {
+        return value;
+      }
+    }
+    return null;
   }
 
   private normalizeReturnUrl(returnUrl: string): string {

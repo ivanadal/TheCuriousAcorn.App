@@ -36,10 +36,10 @@ jobs:
         run: npm ci
         working-directory: thecuriousacorn.app
 
-      - name: Generate environment file from secrets
+      - name: Generate production environment file from secrets
         run: |
           mkdir -p src/environments
-          cat > src/environments/environment.ts << 'EOF'
+          cat > src/environments/environment.prod.ts << 'EOF'
           export const environment = {
             production: true,
             apiUrl: '${{ secrets.API_URL }}',
