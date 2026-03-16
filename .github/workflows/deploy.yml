@@ -36,6 +36,18 @@ jobs:
         run: npm ci
         working-directory: thecuriousacorn.app
 
+      - name: Generate environment file from secrets
+        run: |
+          mkdir -p src/environments
+          cat > src/environments/environment.ts << 'EOF'
+          export const environment = {
+            production: true,
+            apiUrl: '${{ secrets.API_URL }}',
+            apiBaseUrl: '${{ secrets.API_BASE_URL }}'
+          };
+          EOF
+        working-directory: thecuriousacorn.app
+
       - name: Build
         run: npm run build -- --base-href /TheCuriousAcorn.App/
         working-directory: thecuriousacorn.app
