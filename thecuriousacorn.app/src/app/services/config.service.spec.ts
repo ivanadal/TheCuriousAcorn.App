@@ -1,8 +1,5 @@
 import {
-  TestBed,
-  fakeAsync,
-  flushMicrotasks,
-  tick
+  TestBed
 } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import {
@@ -32,7 +29,7 @@ describe('ConfigService', () => {
     httpMock.verify();
   });
 
-  it('loads config from backend and updates state', fakeAsync(() => {
+  it('loads config from backend and updates state', async () => {
     const remoteConfig: AppConfig = {
       googleClientId: 'google-client-id',
       eventLabsApiKey: 'event-labs-key',
@@ -40,42 +37,36 @@ describe('ConfigService', () => {
       production: true
     };
 
-    let result: AppConfig | undefined;
-    service.loadConfig().then((value) => {
-      result = value;
-    });
+    const resultPromise = service.loadConfig();
 
     const req = httpMock.expectOne(endpoint);
     expect(req.request.method).toBe('GET');
     req.flush(remoteConfig);
 
-    flushMicrotasks();
+    const result = await resultPromise;
 
     expect(result).toEqual(remoteConfig);
     expect(service.isLoaded()).toBe(true);
     expect(service.getConfig()).toEqual(remoteConfig);
     expect(service.getGoogleClientId()).toBe('google-client-id');
     expect(service.getApiUrl()).toBe('https://api.example.com');
-  }));
+  });
 
-  it('falls back to safe defaults after retries are exhausted', fakeAsync(() => {
-    let result: AppConfig | undefined;
-    service.loadConfig().then((value) => {
-      result = value;
-    });
+  it('falls back to safe defaults after retries are exhausted', async () => {
+    const resultPromise = service.loadConfig();
 
     const firstAttempt = httpMock.expectOne(endpoint);
     firstAttempt.flush('error', { status: 500, statusText: 'Server Error' });
-    tick(700);
+    await new Promise((resolve) => setTimeout(resolve, 750));
 
     const secondAttempt = httpMock.expectOne(endpoint);
     secondAttempt.flush('error', { status: 500, statusText: 'Server Error' });
-    tick(700);
+    await new Promise((resolve) => setTimeout(resolve, 750));
 
     const thirdAttempt = httpMock.expectOne(endpoint);
     thirdAttempt.flush('error', { status: 500, statusText: 'Server Error' });
 
-    flushMicrotasks();
+    const result = await resultPromise;
 
     const fallbackConfig: AppConfig = {
       googleClientId: '',
@@ -89,5 +80,5 @@ describe('ConfigService', () => {
     expect(service.getConfig()).toEqual(fallbackConfig);
     expect(service.getGoogleClientId()).toBe('');
     expect(service.getApiUrl()).toBe(environment.apiUrl);
-  }));
+  });
 });

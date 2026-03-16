@@ -1,13 +1,13 @@
 <div class="app-container">
   <style>
-    .app-title { margin-top: clamp(130px, 30vh, 240px); transition: margin-top .15s ease; }
+    .app-title { margin-top: clamp(184px, 25vh, 282px); transition: margin-top .15s ease; }
   </style>
 
   <!-- HOME SCREEN -->
   @if (screen() === 'home') {
     <h1 class="app-title">Nature Explorer</h1>
 
-    <main>
+    <main class="home-main">
       <div class="find-wrapper">
         <div class="find-figure">
           <button class="img-button" aria-label="Find a leaf" (click)="openCamera
@@ -41,9 +41,29 @@
           <span class="error-toast__text">{{ errorMessage() }}</span>
         </div>
       }
-
-      <!-- Age Group Selector -->
     </main>
+
+    <footer class="age-selector age-selector--footer" aria-label="Age group selector">
+      <div class="age-buttons">
+        @for (group of ageGroups; track group.id; let idx = $index) {
+          <button
+            type="button"
+            class="age-btn"
+            [class.active]="selectedAgeGroup() === group.id"
+            (click)="selectAgeGroup(group.id)"
+            [attr.aria-pressed]="selectedAgeGroup() === group.id"
+            [attr.aria-label]="group.label"
+          >
+            <img
+              [src]="selectedAgeGroup() === group.id ? '/age-group-' + (idx + 1) + '-clicked.png' : '/age-group-' + (idx + 1) + '.png'"
+              [alt]="group.label"
+              class="age-btn__image"
+            >
+            <span class="age-btn__label">{{ group.label }}</span>
+          </button>
+        }
+      </div>
+    </footer>
   }
 
   <!-- LOADING SCREEN -->
