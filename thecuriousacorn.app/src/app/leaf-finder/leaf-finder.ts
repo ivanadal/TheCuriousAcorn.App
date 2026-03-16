@@ -33,6 +33,7 @@ function isLeafAnalysisResult(value: unknown): value is LeafAnalysisResult {
 })
 
 export class LeafFinderComponent {
+  backgroundImageUrl = 'forest-background.png';
   screen = signal<'home' | 'loading' | 'result'>('home');
   selectedAgeGroup = signal('early');
   leafResult = signal<LeafAnalysisResult | null>(null);

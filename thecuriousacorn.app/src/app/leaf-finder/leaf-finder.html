@@ -1,4 +1,4 @@
-<div class="app-container">
+<div class="app-container" [style.background-image]="'url(' + backgroundImageUrl + ')'">
   <style>
     .app-title { margin-top: clamp(184px, 25vh, 282px); transition: margin-top .15s ease; }
   </style>
@@ -55,7 +55,7 @@
             [attr.aria-label]="group.label"
           >
             <img
-              [src]="selectedAgeGroup() === group.id ? '/age-group-' + (idx + 1) + '-clicked.png' : '/age-group-' + (idx + 1) + '.png'"
+              [src]="selectedAgeGroup() === group.id ? 'age-group-' + (idx + 1) + '-clicked.png' : 'age-group-' + (idx + 1) + '.png'"
               [alt]="group.label"
               class="age-btn__image"
             >
