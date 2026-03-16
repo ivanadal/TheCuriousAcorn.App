@@ -5,7 +5,7 @@
 
 /* Main Container */
 .app-container {
-  background-image: url('/forest-background.png');
+  background-image: url('forest-background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

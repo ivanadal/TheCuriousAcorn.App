@@ -18,19 +18,19 @@
                   <img [src]="selectedImage()" alt="Find a leaf">
                 </span>
                 <button class="retake-btn-pos" (click)="openCamera(); $event.stopPropagation()" title="Retake photo">
-                  <img src="/repeat-btn.png" alt="Retake" class="repeat-icon">
+                  <img src="repeat-btn.png" alt="Retake" class="repeat-icon">
                 </button>
               </div>
             </ng-container>
             <ng-template #noImage>
-              <img src="/find-a-leaf.png" alt="Find a leaf">
+              <img src="find-a-leaf.png" alt="Find a leaf">
             </ng-template>
           </button>
         </div>
 
         <div class="find-figure">
           <button class="img-button" aria-label="Scan leaf" (click)="handleImageUpload()">
-            <img src="/scan-leaf.png" alt="Scan leaf">
+            <img src="scan-leaf.png" alt="Scan leaf">
           </button>
         </div>
       </div>
@@ -65,7 +65,7 @@
 
       <div class="result-content">
         <button class="replay-btn repeat-btn" *ngIf="lastAudioUrl" (click)="replayAudio()" title="Replay voice">
-          <img src="/repeat-btn.png" alt="Replay" class="repeat-icon">
+          <img src="repeat-btn.png" alt="Replay" class="repeat-icon">
         </button>
         <h2 class="result-leaf-name">{{ leafResult()?.leafName }}</h2>
         <div class="result-emoji">✨</div>
