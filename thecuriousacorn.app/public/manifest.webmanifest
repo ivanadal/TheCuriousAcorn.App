@@ -1,0 +1,16 @@
+{
+  "name": "The Curious Acorn",
+  "short_name": "CuriousAcorn",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f2e8",
+  "theme_color": "#4A5D45",
+  "icons": [
+    {
+      "src": "curious_acorn.png",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,6 +1,14 @@
 <div class="app-container" [style.background-image]="'url(' + backgroundImageUrl + ')'">
   <style>
     .app-title { margin-top: clamp(184px, 25vh, 282px); transition: margin-top .15s ease; }
+
+    @media (min-width: 900px) {
+      .app-title { margin-top: clamp(188px, 24vh, 250px); }
+    }
+
+    @media (min-width: 900px) and (max-height: 920px) {
+      .app-title { margin-top: clamp(156px, 20vh, 220px); }
+    }
   </style>
 
   <!-- HOME SCREEN -->
@@ -90,21 +98,25 @@
         <button class="replay-btn repeat-btn" *ngIf="lastAudioUrl" (click)="replayAudio()" title="Replay voice">
           <img src="repeat-btn.png" alt="Replay" class="repeat-icon">
         </button>
-        <h2 class="result-leaf-name">{{ leafResult()?.leafName }}</h2>
-        <div class="result-emoji">✨</div>
+        <div class="result-scroll">
+          <h2 class="result-leaf-name">{{ leafResult()?.leafName }}</h2>
+          <div class="result-emoji">✨</div>
 
-        <p class="result-explanation">
-          {{ leafResult()?.explanation }}
-        </p>
+          <p class="result-explanation">
+            {{ leafResult()?.explanation }}
+          </p>
 
-        <div class="result-fun-fact">
-          <p class="fact-label">🎉 FUN FACT</p>
-          <p class="fact-text">{{ leafResult()?.funFact }}</p>
+          <div class="result-fun-fact">
+            <p class="fact-label">🎉 FUN FACT</p>
+            <p class="fact-text">{{ leafResult()?.funFact }}</p>
+          </div>
         </div>
 
-        <button class="explore-btn" (click)="findAnotherLeaf()">
-          Find Another Leaf
-        </button>
+        <div class="result-actions">
+          <button class="explore-btn" (click)="findAnotherLeaf()">
+            Find Another Leaf
+          </button>
+        </div>
         <!-- <button class="replay-btn" *ngIf="lastAudioUrl" (click)="replayAudio()">
           🔁                         
         </button> -->

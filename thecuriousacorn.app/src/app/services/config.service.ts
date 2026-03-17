@@ -8,7 +8,6 @@ import { ApiErrorService } from './api-error.service';
 
 export interface AppConfig {
   googleClientId: string;
-  eventLabsApiKey : string;
   apiUrl: string;
   production: boolean;
 }
@@ -56,7 +55,6 @@ export class ConfigService {
       });
       const fallbackConfig: AppConfig = {
         googleClientId: '',
-        eventLabsApiKey: '',
         apiUrl: environment.apiUrl,
         production: environment.production
       };

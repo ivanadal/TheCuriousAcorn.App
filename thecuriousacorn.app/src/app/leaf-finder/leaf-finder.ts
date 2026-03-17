@@ -89,10 +89,20 @@ export class LeafFinderComponent {
         console.error('Leaf analysis request failed', err);
         this.isLoading = false;
         this.screen.set('home');
+        const apiMessage =
+          err &&
+          typeof err === 'object' &&
+          'error' in err &&
+          (err as { error?: unknown }).error &&
+          typeof (err as { error?: { message?: unknown } }).error?.message === 'string'
+            ? (err as { error: { message: string } }).error.message
+            : null;
+
         this.errorMessage.set(
-          this.apiErrorService.toUserMessage(err, {
-            default: 'We could not analyze this leaf right now. Please try again.'
-          })
+          apiMessage ??
+            this.apiErrorService.toUserMessage(err, {
+              default: 'We could not analyze this leaf right now. Please try again.'
+            })
         );
       }
     });
