@@ -9,13 +9,21 @@ export interface LeafAnalysisResult {
   funFact: string;
 }
 
+export type LeafLanguage = 'en' | 'es' | 'sr';
+
 @Injectable({ providedIn: 'root' })
 export class LeafService {
   constructor(private http: HttpClient) {}
 
-  analyzeLeaf(base64Image: string, ageGroup: string): Observable<LeafAnalysisResult> {
+  analyzeLeaf(base64Image: string, ageGroup: string, language: LeafLanguage = 'en'): Observable<LeafAnalysisResult> {
+    const endpointByLanguage: Record<LeafLanguage, string> = {
+      en: `${environment.apiUrl}/leafanalysis/analyze`,
+      es: `${environment.apiUrl}/leafanalysis/analyze/es`,
+      sr: `${environment.apiUrl}/leafanalysis/analyze/sr`
+    };
+
     return this.http
-      .post<LeafAnalysisResult>(`${environment.apiUrl}/leafanalysis/analyze`, {
+      .post<LeafAnalysisResult>(endpointByLanguage[language], {
         imageBase64: base64Image,
         ageGroup: ageGroup
       })

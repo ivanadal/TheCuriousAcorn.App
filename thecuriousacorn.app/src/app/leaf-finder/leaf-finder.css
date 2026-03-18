@@ -35,6 +35,11 @@
 }
 
 /* Title */
+.home-header {
+  position: relative;
+  width: min(100%, 380px);
+}
+
 .app-title {
   font-family: 'Nunito', sans-serif;
   font-weight: 900;
@@ -42,11 +47,11 @@
   color: #4A5D45;
   text-transform: uppercase;
   text-align: center;
-  margin-top: clamp(130px, 30vh, 240px);
+  margin-top: 0;
   margin-bottom: 0;
-  transition: margin-top 0.15s ease;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 52px;
 }
 
 .home-main {
@@ -58,6 +63,54 @@
   align-items: center;
   overflow: visible;
   padding-bottom: clamp(20px, 5vh, 42px);
+}
+
+.home-toolbar {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.language-toggle:hover {
+  transform: translateY(-1px);
+}
+
+.language-toggle:focus,
+.language-toggle:focus-visible,
+.language-toggle:active {
+  outline: none;
+  box-shadow: none;
+}
+
+.language-toggle__icon-wrap {
+  width: 3.1rem;
+  height: 3.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.language-toggle__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 /* Centered button wrapper */
@@ -533,13 +586,31 @@
 
   .app-title {
     font-size: 1.35rem;
-    margin-top: clamp(32px, 3.5vh, 56px);
     margin-bottom: 4px;
+    padding: 0 46px;
+  }
+
+  .home-header {
+    width: 100%;
+    margin-top: clamp(32px, 3.5vh, 56px);
   }
 
   .find-wrapper {
     margin-top: 2px;
     gap: 1px;
+  }
+
+  .home-toolbar {
+    right: 2px;
+  }
+
+  .language-toggle {
+    padding: 0;
+  }
+
+  .language-toggle__icon-wrap {
+    width: 2.7rem;
+    height: 2.7rem;
   }
 
   .img-button img {
@@ -575,6 +646,14 @@
     padding: 7px 10px;
     margin-top: 8px;
     margin-bottom: 4px;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + 84px);
+    width: min(calc(100% - 20px), 380px);
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 30;
   }
 
   .age-buttons {
@@ -611,6 +690,7 @@
 
   .app-title {
     font-size: 1.05rem;
+    padding: 0 42px;
   }
 
   .find-wrapper {

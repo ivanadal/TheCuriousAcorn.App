@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LeafService } from '../services/leaf-finder.service';
+import { LeafLanguage, LeafService } from '../services/leaf-finder.service';
 import { ApiErrorService } from '../services/api-error.service';
 
 export interface LeafAnalysisResult {
@@ -34,6 +34,7 @@ export class LeafFinderComponent {
   backgroundImageUrl = 'forest-background.png';
   screen = signal<'home' | 'loading' | 'result'>('home');
   selectedAgeGroup = signal('early');
+  selectedLanguage = signal<LeafLanguage>('en');
   leafResult = signal<LeafAnalysisResult | null>(null);
   selectedImage = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
@@ -53,6 +54,13 @@ export class LeafFinderComponent {
     { id: 'teen', label: '13+ years', emoji: '🌲' }
   ];
 
+  readonly languageOrder: LeafLanguage[] = ['en', 'sr', 'es'];
+  readonly languageLabelByCode: Record<LeafLanguage, string> = {
+    en: 'English',
+    sr: 'Serbian',
+    es: 'Spanish'
+  };
+
   constructor(
     private leafService: LeafService,
     private apiErrorService: ApiErrorService
@@ -61,7 +69,7 @@ export class LeafFinderComponent {
   private analyzeLeaf(base64Image: string): void {
     this.isLoading = true;
 
-    this.leafService.analyzeLeaf(base64Image, this.selectedAgeGroup()).subscribe({
+    this.leafService.analyzeLeaf(base64Image, this.selectedAgeGroup(), this.selectedLanguage()).subscribe({
       next: (response: LeafAnalysisResult) => {
         if (!isLeafAnalysisResult(response)) {
           this.isLoading = false;
@@ -78,7 +86,9 @@ export class LeafFinderComponent {
         console.log('Analysis result:', response);
 
         this.lastSpeechText = this.buildSpeechText(response);
-        this.speakText(this.lastSpeechText);
+        if (this.isSpeechEnabled()) {
+          this.speakText(this.lastSpeechText);
+        }
       },
 
       error: (err) => {
@@ -161,14 +171,43 @@ export class LeafFinderComponent {
     this.selectedAgeGroup.set(ageId);
   }
 
+  cycleLanguage(): void {
+    const current = this.selectedLanguage();
+    const currentIndex = this.languageOrder.indexOf(current);
+    const nextIndex = (currentIndex + 1) % this.languageOrder.length;
+    this.selectedLanguage.set(this.languageOrder[nextIndex]);
+  }
+
+  languageDisplayLabel(): string {
+    return this.languageLabelByCode[this.selectedLanguage()];
+  }
+
+  languageIconPath(): string {
+    const iconByLanguage: Record<LeafLanguage, string> = {
+      en: 'lang-en-tree.svg',
+      sr: 'lang-sr-tree.svg',
+      es: 'lang-es-tree.svg'
+    };
+
+    return iconByLanguage[this.selectedLanguage()];
+  }
+
+  languageIconClass(): string {
+    return 'language-toggle__img';
+  }
+
+  shouldShowReplayButton(): boolean {
+    return this.canReplaySpeech && this.isSpeechEnabled();
+  }
+
   replayAudio() {
-    if (this.lastSpeechText) {
+    if (this.lastSpeechText && this.isSpeechEnabled()) {
       this.speakText(this.lastSpeechText);
     }
   }
 
   private buildSpeechText(result: LeafAnalysisResult): string {
-    return `${result.leafName}. ${result.explanation} Fun fact: ${result.funFact}`;
+    return `${result.leafName}. ${result.explanation} ${result.funFact}`;
   }
 
   private speakText(text: string): void {
@@ -179,13 +218,14 @@ export class LeafFinderComponent {
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    utterance.lang = this.speechLangForSelection();
     utterance.rate = 0.95;
     utterance.pitch = 1;
 
     const voices = window.speechSynthesis.getVoices();
+    const languagePrefix = this.selectedLanguage();
     const preferredVoice = voices.find(
-      voice => voice.lang.toLowerCase().startsWith('en') && /female|samantha|zira|google us english/i.test(voice.name)
+      voice => voice.lang.toLowerCase().startsWith(languagePrefix)
     );
 
     if (preferredVoice) {
@@ -195,9 +235,23 @@ export class LeafFinderComponent {
     window.speechSynthesis.speak(utterance);
   }
 
+  private speechLangForSelection(): string {
+    const byLanguage: Record<LeafLanguage, string> = {
+      en: 'en-US',
+      es: 'es-ES',
+      sr: 'sr-RS'
+    };
+
+    return byLanguage[this.selectedLanguage()];
+  }
+
   private stopSpeech(): void {
     if (this.canReplaySpeech) {
       window.speechSynthesis.cancel();
     }
+  }
+
+  private isSpeechEnabled(): boolean {
+    return this.selectedLanguage() !== 'sr';
   }
 }

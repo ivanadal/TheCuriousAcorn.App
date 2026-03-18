@@ -1,19 +1,35 @@
 <div class="app-container" [style.background-image]="'url(' + backgroundImageUrl + ')'">
   <style>
-    .app-title { margin-top: clamp(184px, 25vh, 282px); transition: margin-top .15s ease; }
+    .home-header { margin-top: clamp(184px, 25vh, 282px); transition: margin-top .15s ease; }
 
     @media (min-width: 900px) {
-      .app-title { margin-top: clamp(188px, 24vh, 250px); }
+      .home-header { margin-top: clamp(188px, 24vh, 250px); }
     }
 
     @media (min-width: 900px) and (max-height: 920px) {
-      .app-title { margin-top: clamp(156px, 20vh, 220px); }
+      .home-header { margin-top: clamp(156px, 20vh, 220px); }
     }
   </style>
 
   <!-- HOME SCREEN -->
   @if (screen() === 'home') {
-    <h1 class="app-title">Nature Explorer</h1>
+    <div class="home-header">
+      <h1 class="app-title">Nature Explorer</h1>
+
+      <div class="home-toolbar">
+        <button
+          type="button"
+          class="language-toggle"
+          (click)="cycleLanguage()"
+          [attr.aria-label]="'Language: ' + languageDisplayLabel() + '. Tap to switch language'"
+          [title]="'Language: ' + languageDisplayLabel()"
+        >
+          <span class="language-toggle__icon-wrap" aria-hidden="true">
+            <img [src]="languageIconPath()" [alt]="languageDisplayLabel()" [class]="languageIconClass()">
+          </span>
+        </button>
+      </div>
+    </div>
 
     <main class="home-main">
       <div class="find-wrapper">
@@ -95,7 +111,7 @@
       </div> -->
 
       <div class="result-content">
-        <button class="replay-btn repeat-btn" *ngIf="canReplaySpeech" (click)="replayAudio()" title="Replay voice">
+        <button class="replay-btn repeat-btn" *ngIf="shouldShowReplayButton()" (click)="replayAudio()" title="Replay voice">
           <img src="repeat-btn.png" alt="Replay" class="repeat-icon">
         </button>
         <div class="result-scroll">
