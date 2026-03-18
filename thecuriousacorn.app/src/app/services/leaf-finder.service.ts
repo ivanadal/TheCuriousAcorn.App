@@ -28,8 +28,8 @@ export class LeafService {
         ageGroup: ageGroup
       })
       .pipe(
-        timeout(15000),
-        retry({ count: 1, delay: 600 })
+        timeout(45000),
+        retry({ count: 1, delay: 1200 })
       );
   }
 }

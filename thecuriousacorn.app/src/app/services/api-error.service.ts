@@ -9,7 +9,7 @@ export interface ApiErrorMessageOverrides {
 }
 
 const DEFAULT_MESSAGES: Required<ApiErrorMessageOverrides> = {
-  timeout: 'The request took too long. Please try again.',
+  timeout: 'The request took too long. If you are on mobile data, try again with a clearer photo or a stronger signal.',
   offline: 'We cannot reach the server right now. Check your connection and try again.',
   unauthorized: 'Your session expired. Please sign in again.',
   server: 'Our servers are busy right now. Please try again in a moment.',

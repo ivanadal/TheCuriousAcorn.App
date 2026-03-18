@@ -139,15 +139,16 @@ export class LeafFinderComponent {
         console.log('Selected file:', file);
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-          this.base64Image = e.target?.result as string;
-          this.selectedImage.set(this.base64Image);
+        reader.onload = async (e) => {
+          const originalDataUrl = e.target?.result as string;
+          const optimizedDataUrl = await this.optimizeImageForUpload(originalDataUrl);
+
+          this.base64Image = optimizedDataUrl;
+          this.selectedImage.set(optimizedDataUrl);
           this.errorMessage.set(null);
-          console.log('Base64:', this.base64Image);
 
           this.screen.set('loading');
-          this.analyzeLeaf(this.base64Image);
-
+          this.analyzeLeaf(optimizedDataUrl);
         };
         reader.readAsDataURL(file);
       }
@@ -252,6 +253,35 @@ export class LeafFinderComponent {
     if (this.canReplaySpeech) {
       window.speechSynthesis.cancel();
     }
+  }
+
+  private optimizeImageForUpload(dataUrl: string): Promise<string> {
+    return new Promise((resolve) => {
+      const image = new Image();
+
+      image.onload = () => {
+        const maxDimension = 1280;
+        const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+        const targetWidth = Math.max(1, Math.round(image.width * scale));
+        const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+          resolve(dataUrl);
+          return;
+        }
+
+        context.drawImage(image, 0, 0, targetWidth, targetHeight);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+
+      image.onerror = () => resolve(dataUrl);
+      image.src = dataUrl;
+    });
   }
 
   private isSpeechEnabled(): boolean {
