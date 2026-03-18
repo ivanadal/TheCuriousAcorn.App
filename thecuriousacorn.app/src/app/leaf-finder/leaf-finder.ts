@@ -145,6 +145,9 @@ export class LeafFinderComponent {
           this.errorMessage.set(null);
           console.log('Base64:', this.base64Image);
 
+          this.screen.set('loading');
+          this.analyzeLeaf(this.base64Image);
+
         };
         reader.readAsDataURL(file);
       }

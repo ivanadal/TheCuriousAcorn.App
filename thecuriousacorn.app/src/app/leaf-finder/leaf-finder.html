@@ -37,24 +37,13 @@
           <button class="img-button" aria-label="Find a leaf" (click)="openCamera
           ()">
             <ng-container *ngIf="selectedImage(); else noImage">
-              <div class="retake-wrapper">
-                <span class="find-a-leaf-border-container">
-                  <img [src]="selectedImage()" alt="Find a leaf">
-                </span>
-                <button class="retake-btn-pos" (click)="openCamera(); $event.stopPropagation()" title="Retake photo">
-                  <img src="repeat-btn.png" alt="Retake" class="repeat-icon">
-                </button>
-              </div>
+              <span class="find-a-leaf-border-container">
+                <img [src]="selectedImage()" alt="Find a leaf">
+              </span>
             </ng-container>
             <ng-template #noImage>
               <img src="find-a-leaf.png" alt="Find a leaf">
             </ng-template>
-          </button>
-        </div>
-
-        <div class="find-figure">
-          <button class="img-button" aria-label="Scan leaf" (click)="handleImageUpload()">
-            <img src="scan-leaf.png" alt="Scan leaf">
           </button>
         </div>
       </div>
