@@ -1,14 +1,12 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LeafService } from '../services/leaf-finder.service';
-import { environment } from '../../environments/environment';
 import { ApiErrorService } from '../services/api-error.service';
 
 export interface LeafAnalysisResult {
   leafName: string;
   explanation: string;
   funFact: string;
-  voiceUrl?: string; // optional URL to pre-generated audio
 }
 
 function isLeafAnalysisResult(value: unknown): value is LeafAnalysisResult {
@@ -42,8 +40,11 @@ export class LeafFinderComponent {
   isLoading = false;
   result: LeafAnalysisResult | null = null;
   base64Image: string = '';
-  lastAudioUrl: string | null = null;
-  private audioElement: HTMLAudioElement | null = null;
+  canReplaySpeech =
+    typeof window !== 'undefined' &&
+    typeof window.speechSynthesis !== 'undefined' &&
+    typeof SpeechSynthesisUtterance !== 'undefined';
+  private lastSpeechText: string | null = null;
 
   ageGroups = [
     { id: 'preschool', label: '4-6 years', emoji: '🌱' },
@@ -76,13 +77,8 @@ export class LeafFinderComponent {
         this.screen.set('result');
         console.log('Analysis result:', response);
 
-        if (response.voiceUrl) {
-          // prepend the backend base URL so relative paths work
-          const url = `${environment.apiBaseUrl}${response.voiceUrl}`;
-          this.lastAudioUrl = url;
-          this.audioElement = new Audio(url);
-          this.audioElement.play().catch(err => console.error('Audio play error:', err, url));
-        } 
+        this.lastSpeechText = this.buildSpeechText(response);
+        this.speakText(this.lastSpeechText);
       },
 
       error: (err) => {
@@ -148,16 +144,14 @@ export class LeafFinderComponent {
   }
 
   backToHome() {
+    this.stopSpeech();
     this.screen.set('home');
     this.leafResult.set(null);
     this.selectedImage.set(null);
   }
 
   findAnotherLeaf() {
-    if (this.audioElement) {
-      this.audioElement.pause();
-      this.audioElement.currentTime = 0;
-    }
+    this.stopSpeech();
     this.screen.set('home');
     this.leafResult.set(null);
     this.selectedImage.set(null);
@@ -168,15 +162,42 @@ export class LeafFinderComponent {
   }
 
   replayAudio() {
-    if (this.lastAudioUrl) {
-      if (this.audioElement) {
-        this.audioElement.currentTime = 0;
-        this.audioElement.play().catch(err => console.error('Replay error', err));
-      } else {
-        const audio = new Audio(this.lastAudioUrl);
-        audio.play().catch(err => console.error('Replay error', err));
-        this.audioElement = audio;
-      }
+    if (this.lastSpeechText) {
+      this.speakText(this.lastSpeechText);
+    }
+  }
+
+  private buildSpeechText(result: LeafAnalysisResult): string {
+    return `${result.leafName}. ${result.explanation} Fun fact: ${result.funFact}`;
+  }
+
+  private speakText(text: string): void {
+    if (!this.canReplaySpeech) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(
+      voice => voice.lang.toLowerCase().startsWith('en') && /female|samantha|zira|google us english/i.test(voice.name)
+    );
+
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  private stopSpeech(): void {
+    if (this.canReplaySpeech) {
+      window.speechSynthesis.cancel();
     }
   }
 }

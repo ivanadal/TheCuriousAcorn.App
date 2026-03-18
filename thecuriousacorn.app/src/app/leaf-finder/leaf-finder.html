@@ -95,7 +95,7 @@
       </div> -->
 
       <div class="result-content">
-        <button class="replay-btn repeat-btn" *ngIf="lastAudioUrl" (click)="replayAudio()" title="Replay voice">
+        <button class="replay-btn repeat-btn" *ngIf="canReplaySpeech" (click)="replayAudio()" title="Replay voice">
           <img src="repeat-btn.png" alt="Replay" class="repeat-icon">
         </button>
         <div class="result-scroll">
