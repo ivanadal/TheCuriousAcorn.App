@@ -585,9 +585,9 @@
   }
 
   .app-title {
-    font-size: 1.35rem;
+    font-size: 1.7rem;
     margin-bottom: 4px;
-    padding: 0 46px;
+    padding: 0 42px;
   }
 
   .home-header {
@@ -699,11 +699,11 @@
   }
 
   .img-button img {
-    width: clamp(88px, 28vw, 155px);
+    width: clamp(130px, 34vw, 230px);
   }
 
   .retake-wrapper {
-    width: clamp(88px, 28vw, 155px);
+    width: clamp(130px, 34vw, 230px);
     padding: 6px 6px 0 0;
   }
 
@@ -758,11 +758,11 @@
   }
 
   .img-button img {
-    width: clamp(82px, 24vw, 140px);
+    width: clamp(118px, 30vw, 200px);
   }
 
   .retake-wrapper {
-    width: clamp(82px, 24vw, 140px);
+    width: clamp(118px, 30vw, 200px);
   }
 
   .retake-btn-pos {
