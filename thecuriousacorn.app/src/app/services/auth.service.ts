@@ -16,6 +16,7 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private apiErrorService = inject(ApiErrorService);
+  private sessionExpiryTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
   // Signals
   isLoggedIn = signal(false);
@@ -28,6 +29,21 @@ export class AuthService {
 
   constructor() {
     this.checkAuthStatus();
+  }
+
+  hasActiveSession(): boolean {
+    const token = this.getAuthToken();
+    if (!token) {
+      this.clearAuthState();
+      return false;
+    }
+
+    if (this.isTokenExpired(token)) {
+      this.clearAuthState();
+      return false;
+    }
+
+    return this.isLoggedIn();
   }
 
   /**
@@ -74,6 +90,7 @@ export class AuthService {
   }
 
   clearAuthState() {
+    this.clearSessionExpiryTimer();
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     this.isLoggedIn.set(false);
@@ -89,8 +106,14 @@ export class AuthService {
 
     if (token && user) {
       try {
+        if (this.isTokenExpired(token)) {
+          this.clearAuthState();
+          return;
+        }
+
         this.currentUser.set(JSON.parse(user));
         this.isLoggedIn.set(true);
+        this.scheduleAutoLogout(token);
       } catch (error) {
         console.warn('Invalid persisted user payload. Clearing auth state.', error);
         localStorage.removeItem('authToken');
@@ -109,6 +132,7 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(response.user));
     this.isLoggedIn.set(true);
     this.currentUser.set(response.user);
+    this.scheduleAutoLogout(response.token);
   }
 
   private isAuthResponse(response: unknown): response is AuthResponse {
@@ -184,6 +208,77 @@ export class AuthService {
       return '/dashboard';
     }
     return returnUrl;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const expiryMs = this.getTokenExpiryMs(token);
+    if (expiryMs == null) {
+      return false;
+    }
+
+    return expiryMs <= Date.now();
+  }
+
+  private getTokenExpiryMs(token: string): number | null {
+    const payload = this.parseJwtPayload(token);
+    const expiry = payload?.['exp'];
+
+    if (typeof expiry !== 'number') {
+      return null;
+    }
+
+    return Math.floor(expiry * 1000);
+  }
+
+  private scheduleAutoLogout(token: string): void {
+    this.clearSessionExpiryTimer();
+
+    const expiryMs = this.getTokenExpiryMs(token);
+    if (expiryMs == null) {
+      return;
+    }
+
+    const remainingMs = Math.max(expiryMs - Date.now(), 0);
+    this.sessionExpiryTimeoutId = setTimeout(() => {
+      this.clearAuthState();
+      this.redirectToLoginAfterExpiry();
+    }, remainingMs);
+  }
+
+  private clearSessionExpiryTimer(): void {
+    if (this.sessionExpiryTimeoutId != null) {
+      clearTimeout(this.sessionExpiryTimeoutId);
+      this.sessionExpiryTimeoutId = null;
+    }
+  }
+
+  private redirectToLoginAfterExpiry(): void {
+    const currentUrl = this.router.url;
+    if (currentUrl === '/login') {
+      return;
+    }
+
+    this.router.navigate(['/login'], {
+      queryParams: {
+        returnUrl: currentUrl && currentUrl !== '/' ? currentUrl : '/dashboard'
+      }
+    });
+  }
+
+  private parseJwtPayload(token: string): Record<string, unknown> | null {
+    const parts = token.split('.');
+    if (parts.length < 2) {
+      return null;
+    }
+
+    try {
+      const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+      const decoded = atob(padded);
+      return JSON.parse(decoded) as Record<string, unknown>;
+    } catch {
+      return null;
+    }
   }
 
   /**

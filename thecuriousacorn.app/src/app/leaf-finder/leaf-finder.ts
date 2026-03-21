@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { LeafLanguage, LeafService } from '../services/leaf-finder.service';
 import { ApiErrorService } from '../services/api-error.service';
+import { AuthService } from '../services/auth.service';
 
 export interface LeafAnalysisResult {
   leafName: string;
@@ -63,7 +65,9 @@ export class LeafFinderComponent {
 
   constructor(
     private leafService: LeafService,
-    private apiErrorService: ApiErrorService
+    private apiErrorService: ApiErrorService,
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   private analyzeLeaf(base64Image: string): void {
@@ -127,6 +131,12 @@ export class LeafFinderComponent {
   }
 
   openCamera(): void {
+    if (!this.authService.hasActiveSession()) {
+      this.errorMessage.set('Your session expired. Please sign in again.');
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/dashboard' } });
+      return;
+    }
+
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
